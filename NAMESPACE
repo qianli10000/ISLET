@@ -1,0 +1,7 @@
+export('dataprep')
+export('islet.solve')
+export('islet.test')
+import('BiocParallel')
+import('Matrix')
+import('parallel')
+importFrom("stats", "pchisq")

@@ -1,0 +1,17 @@
+Package: ISLET
+Type: Package
+Title: Individual-Specific ceLl typE referencing Tool 
+Version: 0.99.1
+Date: 2022-06-13
+Authors@R: c(person("Hao", "Feng", role = c("aut", "cre"),
+                     email = "hxf155@case.edu"))
+Description: ISLET is a method to conduct signal deconvolution for general -omics data. It can estimate the individual-specific and cell-type-specific reference panels, when there are multiple samples observed from each subject. It takes the input of the observed mixture data (feature by sample matrix), and the cell type mixture proportions (sample by cell type matrix), and the sample-to-subject information. It can solve for the reference panel on the individual-basis. It can also conduct test to identify cell-type-specific differential expression (csDE) genes.  
+License: GPL-2
+Depends: R(>= 4.2.0), Matrix, BiocParallel, parallel
+Imports: stats
+Suggests: BiocStyle, knitr, rmarkdown, htmltools
+Collate: utils.R dataprep.R islet.est.R islet.solve.R islet.test.R
+biocViews: Software, RNASeq, Transcriptomics, DataRepresentation, Transcription, Sequencing, GeneExpression, DataImport, DifferentialExpression, DifferentialMethylation
+Encoding: UTF-8
+LazyData: false
+VignetteBuilder: knitr

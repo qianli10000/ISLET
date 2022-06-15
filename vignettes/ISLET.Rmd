@@ -1,0 +1,110 @@
+---
+title: "**Individual-specific and cell-type-specific deconvolution using ISLET**"
+author:
+- name: Hao Feng
+  affiliation: Department of Population and Quantitative Health Sciences, Case Western Reserve University
+  email: hxf155@case.edu
+package: ISLET
+output:
+  BiocStyle::html_document
+
+abstract: |
+  This vignette introduces the usage of the Bioconductor package ISLET (Individual-Specific ceLl typE referencing Tool). ISLET can deconvolute mixture samples and obtain the individual-specific and cell-type-specific reference panels. ISLET also offers functions to detect cell-type specific differential expression (csDE) genes, using the Likelihood Ratio Test (LRT). ISLET is based on rigorous statistical framework of Expectation–Maximization(EM) algorithm, and has parallel computing embedded to provide superior computational performance.
+vignette: |
+  %\VignetteIndexEntry{ISLET Package User's Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("islet_hex_2.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; left:0; padding:10px; height:280px')
+```
+    
+    
+# Introduction
+
+In clinical samples, the observed bulk sequencing/microarray data are often a mixture of different cell types. Because each unique cell type has its own gene expression profile, the real sequencing/microarray data are the weighted average of signals from multiple pure cell types. In high-throughput data analysis, the mixing proportions will confound with the primary phenotype-of-interest, if not properly accounted for. Over the past several years, researchers have gained substantial interests in using computational methods to deconvolute cell compositions. Under the assumption of a commonly shared feature-by-cell-type reference panel across all samples, deconvolution methods were developed. However, this assumption may not hold. For example, when repeated samples are measured for each subject, assuming a shared reference panel across different time points for each subject is a preferred choice over assuming a shared one across all the samples.
+
+Here, we developed a method called `ISLET` (Individual-Specific ceLl typE referencing Tool), to deconvolute mixture samples and obtain the individual-specific and cell-type-specific reference panels. `ISLET` can leverage on multiple observations or temporal measurements of the same subject. `ISLET` adopted a more reasonable assumption that repeated samples from the same subject would share the same reference panel. This unknown panel, treated as missing values, are estimated by an iterative Expectation--Maximization (EM) algorithm in mixed-effect regression framework, when combining all samples from all subjects together. This is the first statistical framework to estimate the subject-level cell-type-specific reference panel, for repeated measures. Our modeling can effectively borrow information across samples within the same subject.
+
+![Schematic overview of ISLET workflow.](fig1.png)
+
+`ISLET` depends on the following packages:
+
+-   `r Biocpkg("BiocParallel")`, for parallel computing implementation,
+-   `r CRANpkg("Matrix")`, for large matrices operations in *R*.
+
+# Preparing ISLET input files for deconvolution:
+ISLET needs to have the feature by sample matrix for observed values, sample by cell type matrix for cell type proportions, and data frame showing the relationship between samples to subjects. The requirement is the same for both case group and control group, resulting to a total of 6 elements as the input. An example dataset `GE600` is included to show what is required:
+
+**Step 1**: Load in example data.
+
+```{r, eval = TRUE, message = FALSE}
+library(ISLET)
+data(GE600)
+ls()
+```
+
+`case_obs` is a gene expression value data frame of 1,000 genes by 300 cancer sample, for the cancer group. `ctrl_obs` is a gene expression value data frame of 1,000 genes by 300 control sample, for the control group. 
+
+`case_prop` is a cell proportion matrix of 300 cancer samples by 6 cell types, for the cancer group. `ctrl_prop` is a cell proportion matrix of 300 control samples by 6 cell types, for the control group. 
+
+`case_subject` is a two-column data frame showing the relationship between the 300 cancer samples and their 100 subjects, for the cancer group. The first column is the sample_id. The second column is the subject_id. Each subject has 3 repeated/temporal measurements. `ctrl_subject` is a two-column data frame showing the relationship between the 300 control samples and their 100 subjects, for the control group. The format is the same with `case_subject`.
+
+# Data preparation
+This should always be the first step to before using ISLET for deconvolution or testing. This initial step for will prepare your data input ready for downstream deconvolution (function `islet.solve`) and/or differentially expressed gene testing (function `islet.test`).
+
+**Step 2**: Data preparation for downstream ISLET analysis. 
+
+```{r, eval = TRUE, message = FALSE}
+study123input = dataprep(case_obs = case_obs, ctrl_obs = ctrl_obs,
+         case_prop = case_prop, ctrl_prop = ctrl_prop,
+         case_subject = case_subject, ctrl_subject = ctrl_subject)
+```
+
+[**Attention**] Here we have strict requirement for the input data. The features (i.e. rows) in `case_obs` and `ctrl_obs` must match each other. The samples (i.e. rows) in `case_prop`/`ctrl_prop` must match samples (i.e. columns) in `case_obs`/`ctrl_obs`, respectively. The subject IDs across case and control groups must be unique, and sorted in advance. 
+
+# Using ISLET for deconvolution
+
+**Step 3**: With the curated data `study123input` from the previous step, now we can use `ISLET` to conduct deconvolution and obtain the individual-specific and cell-type-specific reference panels. This process can be achieved with one line of code:
+
+```{r, eval = FALSE, message = FALSE}
+#Use ISLET for deconvolution
+res.sol = islet.solve(input = study123input)
+```
+
+The `res.sol` is the deconvolution result output is a list of length G, where G is the number of features (i.e. genes). In the example dataset, G=1000. For each of the G elements, it is a list of length 7. Below is the description of the 7 components: 
+
+`case.m` A vector of length K, where K is the number of cell types. In the example dataset, K=6. It contains the mean cell type profiles (i.e. mean cell type gene expression values for K cell types), for case group, on a specific feature. 
+
+`ctrl.m` A vector of length K, where K is the number of cell types. It contains the mean cell type profiles (i.e. mean cell type gene expression values for K cell types), for control group, on a specific feature.
+
+`case.indv` A subject by cell type matrix containing all the feature values (i.e. gene expression values), for case group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. Values are the summation of fixed effect (`case.m`) and individual random effect (not shown explicitly).
+
+`ctrl.indv` A subject by cell type matrix containing all the feature values (i.e. gene expression values), for control group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. Values are the summation of fixed effect (`ctrl.m`) and individual random effect (not shown explicitly).
+
+`var.k` A vector of length K, where K is the number of cell types. It contains the estimated feature value variance for the K cell types, on a specific feature.
+
+`var.0` A scalar. The estimated residual variance, on a specific feature.
+
+`LLK` A scalar. The log-likelihood from the current model. It can be useful for testing purpose such as Likelihood Ratio Test.
+
+
+
+# Using ISLET for cell-type-specific differential expression (csDE) genes identification
+**Step 4**: Also, with the curated data `study123input` from the previous **Step 2**, now we can test for csDE genes. Notice that Step 3 is optional, if calling csDE genes is the only target of your investigation. This step is done by the following line of code:
+
+```{r, eval = FALSE}
+#Test for csDE genes
+res.test = islet.test(input = study123input)
+```
+
+The result `res.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type.
+
+# Session info {.unnumbered}
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
