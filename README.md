@@ -1,5 +1,4 @@
-# ISLET
-Individual-Specific ceLl typE referencing Tool 
+# ISLET: Individual-Specific ceLl typE referencing Tool 
 
 
 -------------------
