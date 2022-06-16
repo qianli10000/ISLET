@@ -31,12 +31,10 @@ Hao Feng <hxf155@case.edu>
 \examples{
 data(GE600)
 ls()
-## "case_obs"     "case_prop"    "case_subject" "ctrl_obs"     "ctrl_prop"    "ctrl_subject"
+## [1] "case.dat" "ctrl.dat"
 
 #(1) Data preparation
-study123input = dataprep(case_obs = case_obs, ctrl_obs = ctrl_obs,
-         case_prop = case_prop, ctrl_prop = ctrl_prop,
-         case_subject = case_subject, ctrl_subject = ctrl_subject)
+study123input = dataprep(case_dat_se = case.dat, ctrl_dat_se = ctrl.dat)
 
 #(2) [optional for csDE genes testing] Individual-specific and cell-type-specific deconvolution
 result.solve = islet.solve(input = study123input)

@@ -18,13 +18,12 @@ Here, we developed a method called `ISLET` (Individual-Specific ceLl typE refere
 
 `ISLET` depends on the following packages:
 
+-   `r Biocpkg("SummarizedExperiment")`, for data manipulation,
 -   `r Biocpkg("BiocParallel")`, for parallel computing implementation,
 -   `r CRANpkg("Matrix")`, for large matrices operations in *R*.
 
 # Preparing ISLET input files for deconvolution:
-ISLET needs to have the feature by sample matrix for observed values, sample by cell type matrix for cell type proportions, and data frame showing the relationship between samples to subjects. The requirement is the same for both case group and control group, resulting to a total of 6 elements as the input. An example dataset `GE600` is included to show what is required:
-
-ISLET needs to have the feature by sample matrix for observed values, sample by cell type matrix for cell type proportions, and data frame showing the relationship between samples to subjects. The requirement is the same for both case group and control group, resulting to a total of 6 elements as the input. An example dataset `GE600` is included to show what is required:
+ISLET needs to have the two input files organized into `r Biocpkg("SummarizedExperiment")` objects, for cases and controls. Each object should contain a feature by sample matrix for observed values. This should be stored in the `counts` slot. It should also use the first column in the `colData` slot to store a numeric subject IDs, for each sample. The remaining columns in the `colData` slot should store the cell type proportions. In other words, use the column 2 to K+1 to store the cell type proportions for all K cell types. The requirement is the same for both case group and control group. An example dataset `GE600` is included to show what is required:
 
 **Step 1**: Load in example data.
 
@@ -34,11 +33,13 @@ data(GE600)
 ls()
 ```
 
-`case_obs` is a gene expression value data frame of 1,000 genes by 300 cancer sample, for the cancer group. `ctrl_obs` is a gene expression value data frame of 1,000 genes by 300 control sample, for the control group. 
 
-`case_prop` is a cell proportion matrix of 300 cancer samples by 6 cell types, for the cancer group. `ctrl_prop` is a cell proportion matrix of 300 control samples by 6 cell types, for the control group. 
+It contains two `SummarizedExperiment` objects containing the following elements, respectively for each object:
 
-`case_subject` is a two-column data frame showing the relationship between the 300 cancer samples and their 100 subjects, for the cancer group. The first column is the sample_id. The second column is the subject_id. Each subject has 3 repeated/temporal measurements. `ctrl_subject` is a two-column data frame showing the relationship between the 300 control samples and their 100 subjects, for the control group. The format is the same with `case_subject`.
+`counts` stores the gene expression value of 50 genes by 300 sample. 100 cancer/control subjects times 3 repeated measurement each subject.
+
+`colData` component stores the sample meta-data. First column is the subject ID, shows the relationship between the 300 samples IDs and their 100 subject IDs. The remaining 6 columns (i.e. column 2-7) are the cell type proportions of all samples by their 6 cell types.
+
 
 # Data preparation
 This should always be the first step to before using ISLET for deconvolution or testing. This initial step for will prepare your data input ready for downstream deconvolution (function `islet.solve`) and/or differentially expressed gene testing (function `islet.test`).
@@ -46,12 +47,10 @@ This should always be the first step to before using ISLET for deconvolution or 
 **Step 2**: Data preparation for downstream ISLET analysis. 
 
 ```
-study123input = dataprep(case_obs = case_obs, ctrl_obs = ctrl_obs,
-         case_prop = case_prop, ctrl_prop = ctrl_prop,
-         case_subject = case_subject, ctrl_subject = ctrl_subject)
+study123input = dataprep(case_dat_se = case.dat, ctrl_dat_se = ctrl.dat)
 ```
 
-[**Attention**] Here we have strict requirement for the input data. The features (i.e. rows) in `case_obs` and `ctrl_obs` must match each other. The samples (i.e. rows) in `case_prop`/`ctrl_prop` must match samples (i.e. columns) in `case_obs`/`ctrl_obs`, respectively. The subject IDs across case and control groups must be unique, and sorted in advance. 
+[**Attention**] Here we have strict requirement for the input data. The features (i.e. rows) in `counts` must match each other, for cases and controls. The subject IDs across case and control groups must be unique. 
 
 # Using ISLET for deconvolution
 
