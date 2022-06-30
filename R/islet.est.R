@@ -167,8 +167,8 @@ islet.est.bp<-function(ipc, datuse){
 islet.est.win<-function(yvec, datuse){
   #exp_case = as.matrix(datuse$exp_case)
   #exp_ctrl = as.matrix(datuse$exp_ctrl)
-  X = datuse$X
-  A = datuse$A
+  X = as.matrix(datuse$X)
+  A = as.matrix(datuse$A)
   K = datuse$K
   NU = datuse$NU
   NS = datuse$NS
@@ -186,7 +186,7 @@ islet.est.win<-function(yvec, datuse){
   ####1. Initialization of parameters
   #1.1 cell type profiles AND csDE B parameters
   #B_0 = solve(X,Y)
-  B_0 = solve(t(X) %*% X) %*% t(X) %*% Y
+  B_0 = tcrossprod(tcrossprod(solve(crossprod(X)), X), t(Y))
 
   #1.2 error terms
   #sig = mean((Y-X%*%B_0)^2)
@@ -206,8 +206,8 @@ islet.est.win<-function(yvec, datuse){
   pp = 1
   Sig_U = diag(rep(sigK_t, each = NU))
   invSig_U=diag(rep(1/sigK_t, each = NU))
-  Sig_p=solve(t(A) %*% A/sig0_t+invSig_U)
-  E_Up=mu_p=Sig_p %*% t(A)%*% (Y - X %*% B_t)/sig0_t
+  Sig_p=solve(crossprod(A)/sig0_t+invSig_U)
+  E_Up=mu_p=tcrossprod(tcrossprod(Sig_p, A), t(Y - tcrossprod(X, t(B_t))))/sig0_t
 
 
   while(diff2>0.05 & iem<100){
@@ -227,7 +227,7 @@ islet.est.win<-function(yvec, datuse){
     E_U=mu_p =E_Up
 
     #2.2 E[t(S)S|Y]
-    E_StS = sum(diag(A%*%Sig_p%*%t(A))) + sum((A%*%mu_p + X%*%B_t - Y)^2)
+    E_StS = sum(diag(tcrossprod(tcrossprod(A,Sig_p),A))) + sum((tcrossprod(A,t(mu_p)) + tcrossprod(X, t(B_t)) - Y)^2)
 
     #2.3 E[U_k^T U_k|Y]
     mutra_split = split(diag(Sig_p), ceiling(seq_along(diag(Sig_p))/NU))
@@ -237,7 +237,7 @@ islet.est.win<-function(yvec, datuse){
 
     ####3. M-step
     #3.1 B
-    B_tp = solve(t(X)%*%X)%*%t(X)%*%(Y-A%*%E_U)
+    B_tp = tcrossprod(tcrossprod(solve(crossprod(X)),X), t(Y-tcrossprod(A, t(E_U))))
 
     #make correction in case B[1:K]<0 or B_tp[(K+1):2K]<0
     #important to bound the estimation to positive values
@@ -267,8 +267,8 @@ islet.est.win<-function(yvec, datuse){
 
     Sig_U = diag(rep(sigK_t, each = NU))
     invSig_Up=diag(rep(1/sigK_t, each = NU))
-    Sig_p=solve(t(A) %*% A/sig0_t+invSig_Up)
-    E_Up=Sig_p %*% t(A)%*% (Y - X %*% B_t)/sig0_t
+    Sig_p=solve(crossprod(A)/sig0_t+invSig_Up)
+    E_Up=tcrossprod(tcrossprod(Sig_p, A), t(Y - tcrossprod(X, t(B_t))) )/sig0_t
     diff2 = sum(abs(E_Up - E_U))/length(E_U)
     #cat("Random effect diff2=", diff2, "\n")
 
@@ -282,8 +282,8 @@ islet.est.win<-function(yvec, datuse){
   SigU_est = cbind(SigU_est, sigK_t)
 
   #calculate LLK
-  Sig=A%*%Sig_U%*%t(A)+diag(sig0_t,nrow = nrow(A))
-  l=determinant(Sig)$modulus+t(Y-X%*%B_t)%*%solve(Sig)%*%(Y-X%*%B_t)
+  Sig=Matrix::tcrossprod(Matrix::tcrossprod(A,Sig_U), A)+diag(sig0_t,nrow = nrow(A))
+  l=determinant(Sig)$modulus+Matrix::tcrossprod(Matrix::crossprod(Y-Matrix::tcrossprod(X, t(B_t)),Matrix::solve(Sig)),t(Y-Matrix::tcrossprod(X, t(B_t))) )
   llk=c(llk,-as.numeric(l))
 
   #make the estimation results ready for return list

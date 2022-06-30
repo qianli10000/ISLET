@@ -19,7 +19,7 @@ islet.solve<-function(input){
     #res = lapply(X = Yall.list, FUN = islet.est.win, datuse = input)
     nworkers=min(detectCores()-1,15)
     cl <- makeCluster(nworkers)
-    clusterExport(cl,list('ss'))
+#    clusterExport(cl,list('ss'))
 #    clusterEvalQ(cl, {
 #      require(Matrix)})
     res =parLapply(cl, X=Yall.list, islet.est.win, datuse = input)
