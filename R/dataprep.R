@@ -1,5 +1,6 @@
 
 ###function to read-in and check data from case and control: observed expression, proportion, and sample-to-subject relationship
+
 dataprep<-function(case_dat_se, ctrl_dat_se){
   message("Begin: working on data preparation as the input for ISLET algorithm.")
   if (missing(case_dat_se) || missing(ctrl_dat_se))
