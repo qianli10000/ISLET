@@ -282,8 +282,8 @@ islet.est.win<-function(yvec, datuse){
   SigU_est = cbind(SigU_est, sigK_t)
 
   #calculate LLK
-  Sig=Matrix::tcrossprod(Matrix::tcrossprod(A,Sig_U), A)+diag(sig0_t,nrow = nrow(A))
-  l=determinant(Sig)$modulus+Matrix::tcrossprod(Matrix::crossprod(Y-Matrix::tcrossprod(X, t(B_t)),Matrix::solve(Sig)),t(Y-Matrix::tcrossprod(X, t(B_t))) )
+  Sig=tcrossprod(tcrossprod(A,Sig_U), A)+diag(sig0_t,nrow = nrow(A))
+  l=determinant(Sig)$modulus+tcrossprod(crossprod(Y-tcrossprod(X, t(B_t)),solve(Sig)),t(Y-tcrossprod(X, t(B_t))) )
   llk=c(llk,-as.numeric(l))
 
   #make the estimation results ready for return list
