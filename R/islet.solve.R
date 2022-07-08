@@ -52,7 +52,7 @@ islet.solve<-function(input){
   })
 
   names(case.indv.merge)=names(ctrl.indv.merge)=input$CT
-  llk=unlist(c,lapply(res,'[[',7))
+  llk=unlist(lapply(res,'[[',7))
 
   rval=list(case.ind.ref=case.indv.merge,
             ctrl.ind.ref=ctrl.indv.merge,
