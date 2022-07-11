@@ -12,7 +12,7 @@ islet.solve<-function(input){
     if(.Platform$OS.type == "unix") {
     ## do some parallel computation under Unix
 
-      res = bplapply(cl, X=Yall.list, islet.solve.block, datuse = input)
+      res = bplapply( X=Yall.list, islet.solve.block, datuse = input)
   }
   else {
     ## This will be windows
