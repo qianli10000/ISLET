@@ -2,6 +2,11 @@
 ###function to run ISLET, using parallel computing
 
 islet.solve<-function(input){
+    # islet.solve only runs on the model without age effect.
+    if(input$type=='slope'){
+        stop('Input should be prepared by dataprep()')
+    }
+
     #make Yall a list
     G = nrow(input$exp_case)
     Yall=as.matrix(cbind(input$exp_case, input$exp_ctrl))

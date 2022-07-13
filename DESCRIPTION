@@ -10,7 +10,7 @@ License: GPL-2
 Depends: R(>= 4.2.0), Matrix, BiocParallel, parallel, SummarizedExperiment
 Imports: stats
 Suggests: BiocStyle, knitr, rmarkdown, htmltools
-Collate: utils.R dataprep.R islet.est.R islet.solve.R islet.test.R dataprep_slope.R islet.est_slope.R islet.test_slope.R
+Collate: utils.R dataprep.R dataprep_slope.R islet.est.R islet.solve.R islet.test.R 
 biocViews: Software, RNASeq, Transcriptomics, DataRepresentation, Transcription, Sequencing, GeneExpression, DataImport, DifferentialExpression, DifferentialMethylation
 Encoding: UTF-8
 LazyData: false
