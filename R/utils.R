@@ -4,6 +4,12 @@ ss=function(x){
   return(a)
 }
 
+###function to obtain sum of squares
+colss=function(x){
+    a=colSums(x^2)
+    return(a)
+}
+
 ###function to make the design matrix [A] for random effect
 #updated on 05/31/2022 to reflect the change in ID order
 #user should sort their data by subject ID
@@ -36,3 +42,8 @@ LRT<-function(llk_f,llk_0,df){
 }
 
 
+#clexp<-function(){
+#    #clusterExport(cl,list('colss'))
+#    clusterEvalQ(cl, {
+#        library(Matrix)})
+#}

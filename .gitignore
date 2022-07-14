@@ -38,6 +38,11 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
+# other related
+.Rproj
+.DS_Store
+
+
 hidden_file_ext = (
     ".renviron", ".rprofile", ".rproj", ".rproj.user", ".rhistory",
     ".rapp.history", ".o", ".sl", ".so", ".dylib", ".a", ".dll",

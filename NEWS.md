@@ -1,3 +1,4 @@
-# ISLET 0.99.2
+# ISLET 0.99.3
 
-* Added a `NEWS.md` file to track changes to the package.
+-   Slope test implemented.
+-   Added a `NEWS.md` file to track changes to the package.
