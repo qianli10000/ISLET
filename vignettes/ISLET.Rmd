@@ -125,7 +125,6 @@ study456input = dataprep_slope(case_dat_se = case.age.dat, ctrl_dat_se = ctrl.ag
 ```{r, eval = FALSE}
 #(3) Test for slope effect(i.e. age) difference in csDE testing
 age.test = islet.test(input = study456input)
-
 ```
 
 The result `age.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type, to test for difference of the change in reference over time.
