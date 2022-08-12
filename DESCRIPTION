@@ -1,17 +1,19 @@
 Package: ISLET
 Type: Package
 Title: Individual-Specific ceLl typE referencing Tool 
-Version: 0.99.3
+Version: 0.99.4
 Date: 2022-07-14
 Authors@R: c(person("Hao", "Feng", role = c("aut", "cre"),
-                     email = "hxf155@case.edu"))
+                     email = "hxf155@case.edu"),
+             person("Qian", "Li", role = "aut",
+                     email = "Qian.Li@STJUDE.ORG"))
 Description: ISLET is a method to conduct signal deconvolution for general -omics data. It can estimate the individual-specific and cell-type-specific reference panels, when there are multiple samples observed from each subject. It takes the input of the observed mixture data (feature by sample matrix), and the cell type mixture proportions (sample by cell type matrix), and the sample-to-subject information. It can solve for the reference panel on the individual-basis. It can also conduct test to identify cell-type-specific differential expression (csDE) genes.  
 License: GPL-2
-Depends: R(>= 4.2.0), Matrix, BiocParallel, parallel, SummarizedExperiment, BiocGenerics
-Imports: stats
-Suggests: BiocStyle, knitr, rmarkdown, htmltools
+Depends: R(>= 4.1.0), Matrix, parallel, BiocParallel, SummarizedExperiment, BiocGenerics
+Imports: stats, methods
+Suggests: BiocStyle, knitr, rmarkdown, htmltools, RUnit
 Collate: utils.R dataprep.R dataprep_slope.R islet.est.R islet.solve.R islet.test.R
-biocViews: Software, RNASeq, Transcriptomics, DataRepresentation, Transcription, Sequencing, GeneExpression, DataImport, DifferentialExpression, DifferentialMethylation, Coverage
+biocViews: Software, RNASeq, Transcriptomics, Transcription, Sequencing, GeneExpression, DifferentialExpression, DifferentialMethylation
 Encoding: UTF-8
 LazyData: false
 VignetteBuilder: knitr
