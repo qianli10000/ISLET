@@ -37,7 +37,7 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("ISLET")
 ```
 
-## How to get help for using ISLET
+## How to get help
 
 You may post your question on ISLET's GitHub Issue section: <https://github.com/haoharryfeng/ISLET/issues>.
 
