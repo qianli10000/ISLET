@@ -29,7 +29,8 @@ islet.solve.block<-function(Y, datuse){
     B_0 <- Matrix::tcrossprod( Matrix::tcrossprod(solve( Matrix::crossprod(X)), X), t(Y))
 
     #1.2 error terms
-    sig <- mean((Y-X%*%B_0)^2)
+    # sig <- mean((Y-X%*%B_0)^2)
+    sig <- colMeans((Y-X%*%B_0)^2)
     #sig <- 20
 
     #1.3 missing values
@@ -38,8 +39,11 @@ islet.solve.block<-function(Y, datuse){
     B_t <- B_0
     #sig_t = rep(sig, 7)
     U_t <- U_0
-    sig0_t <- rep(sig, G)
-    sigK_t <- rep(sig, K)
+    #sig0_t <- rep(sig, G)
+    #sigK_t <- rep(sig, K)
+    sig0_t <- sig #rep(sig, G)
+    sigK_t <- matrix(rep(sig, each=K), nrow=K)
+
 
     iem <- 1
     diff1 <- 100
@@ -49,7 +53,7 @@ islet.solve.block<-function(Y, datuse){
 
     #Sig_U = diag(rep(sigK_t, each = NU))
     Sig_p<-lapply(seq_len(G), function(x, A, sig0_t, sigK_t, NU, Y, X, B_t){
-        invSig_U<-Matrix::bdiag(diag(rep(1/sigK_t, each=NU)))
+        invSig_U<-Matrix::bdiag(diag(rep(1/sigK_t[, x], each=NU)))
         Sig<-solve( Matrix::crossprod(A)/sig0_t[x]+invSig_U)
         U<- Matrix::tcrossprod( Matrix::tcrossprod(Sig, A),
                                 BiocGenerics::t(Y[, x] - Matrix::tcrossprod(X,
@@ -60,7 +64,7 @@ islet.solve.block<-function(Y, datuse){
     E_Up<-do.call(cbind, lapply(Sig_p, function(x)x$U))
 
 
-    while(diff2>0.01 & iem<30){
+    while(iem<15){
 #        cat("iteration=", iem, "\n")
         iem <- iem + 1
         ####2. E-step
@@ -178,9 +182,9 @@ islet.solve.block<-function(Y, datuse){
 
 
     case.indv <- lapply(seq_len(K), function(k){rel[[k]][seq_len(datuse@case_num), ] +
-            matrix(rep(case.m[k, ], each = datuse@case_num), nrow=datuse@case_num)})
+            matrix(rep(case.m[k, ], each=datuse@case_num), nrow=datuse@case_num)})
     ctrl.indv <- lapply(seq_len(K), function(k){rel[[k]][-seq_len(datuse@case_num), ] +
-            matrix(rep(ctrl.m[k, ], each = datuse@ctrl_num), nrow=datuse@ctrl_num)})
+            matrix(rep(ctrl.m[k, ], each=datuse@ctrl_num), nrow=datuse@ctrl_num)})
     names(case.indv) <- names(rel)
     names(ctrl.indv) <- names(rel)
 
@@ -195,13 +199,13 @@ islet.solve.block<-function(Y, datuse){
 
     #compile return list
     rval <- list(
-        case.m = case.m,
-        ctrl.m = ctrl.m,
-        case.indv = case.indv,
-        ctrl.indv = ctrl.indv,
-        var.k = SigU_est,
-        var.0 = Sig0_est,
-        LLK = llk)
+        case.m=case.m,
+        ctrl.m=ctrl.m,
+        case.indv=case.indv,
+        ctrl.indv=ctrl.indv,
+        var.k=SigU_est,
+        var.0=Sig0_est,
+        LLK=llk)
     return(rval)
 
     message("Complete: parameter estimation from ISLET is complete.")

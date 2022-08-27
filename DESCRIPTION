@@ -1,7 +1,7 @@
 Package: ISLET
 Type: Package
 Title: Individual-Specific ceLl typE referencing Tool 
-Version: 0.99.5
+Version: 0.99.6
 Date: 2022-07-14
 Authors@R: c(person("Hao", "Feng", role = c("aut", "cre"),
                      email = "hxf155@case.edu"),

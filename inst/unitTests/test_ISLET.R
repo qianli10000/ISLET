@@ -7,12 +7,12 @@ test_dataPrep <- function() {
 
     checkEquals(s1@type, "intercept")
     checkEquals(s1@K, 6)
-    checkEquals(s1@case_num, 100)
-    checkEquals(s1@ctrl_num, 100)
-    checkEquals(s1@NS, 600)
-    checkEquals(s1@NU, 200)
+    checkEquals(s1@case_num, 83)
+    checkEquals(s1@ctrl_num, 89)
+    checkEquals(s1@NS, 520)
+    checkEquals(s1@NU, 172)
 
-    checkTrue(length(unique(s1@SubjectID))==200)
+    checkTrue(length(unique(s1@SubjectID))==172)
 
  #   checkEqualsNumeric(divideBy(4, 1.2345), 3.24, tolerance=1.0e-4)
 }
@@ -25,13 +25,89 @@ test_dataPrepSlope <- function() {
 
     checkEquals(s1@type, "slope")
     checkEquals(s1@K, 6)
-    checkEquals(s1@case_num, 100)
-    checkEquals(s1@ctrl_num, 100)
-    checkEquals(s1@NS, 600)
-    checkEquals(s1@NU, 200)
+    checkEquals(s1@case_num, 83)
+    checkEquals(s1@ctrl_num, 89)
+    checkEquals(s1@NS, 520)
+    checkEquals(s1@NU, 172)
 
-    checkTrue(length(unique(s1@SubjectID))==200)
+    checkTrue(length(unique(s1@SubjectID))==172)
 
     #   checkEqualsNumeric(divideBy(4, 1.2345), 3.24, tolerance=1.0e-4)
 }
+
+
+################add test for ISLET testing
+test_ISLETtest <- function() {
+    data("GE600")
+    study123input <- dataPrep(dat_se=GE600_se)
+
+    #(2) [optional for csDE genes testing] Individual-specific and cell-type-specific deconvolution
+    #result.solve <- isletSolve(input=study123input)
+
+    #(3) Test for csDE genes
+    r1 <- isletTest(input=study123input)
+
+    checkEquals(nrow(r1), 50)
+    checkEquals(ncol(r1), 6)
+    checkEquals(sum(r1<=1), 50*6)
+    checkEquals(sum(r1>=0), 50*6)
+
+    checkTrue(r1[11, 1]<0.015)
+    checkTrue(r1[47, 1]<0.01)
+    checkTrue(r1[49, 1]<0.005)
+    checkTrue(r1[50, 1]<0.005)
+
+    checkEqualsNumeric(r1[45, 3], 1, tolerance=1.0e-2)
+    checkEqualsNumeric(r1[45, 3], 1, tolerance=1.0e-2)
+    checkEqualsNumeric(r1[22, 4], 1, tolerance=1.0e-2)
+
+    #   checkEqualsNumeric(divideBy(4, 1.2345), 3.24, tolerance=1.0e-4)
+}
+
+
+test_ISLETtestAge <- function() {
+    data("GE600age")
+
+    #(1) Data preparation
+    study456input <- dataPrepSlope(dat_se=GE600age_se)
+
+    #(2) Test for slope effect(i.e. age) difference in csDE testing
+    r2 <- isletTest(input=study456input)
+
+    checkEquals(nrow(r2), 50)
+    checkEquals(ncol(r2), 6)
+    checkEquals(sum(r2<=1), 50*6)
+    checkEquals(sum(r2>=0), 50*6)
+
+    checkEqualsNumeric(r2[1, 1], 1, tolerance=1.0e-2)
+    checkEqualsNumeric(r2[9, 1], 1, tolerance=1.0e-2)
+    checkEqualsNumeric(r2[45, 3], 1, tolerance=1.0e-2)
+
+    checkTrue(r2[42, 1]<0.01)
+    checkTrue(r2[16, 3]<0.007)
+    checkTrue(r2[49, 5]<0.007)
+    checkTrue(r2[40, 6]<0.01)
+}
+
+
+test_ISLETsolve <- function() {
+    data("GE600")
+    study123input <- dataPrep(dat_se=GE600_se)
+
+    #(2) [optional for csDE genes testing] Individual-specific and cell-type-specific deconvolution
+    s1 <- isletSolve(input=study123input)
+
+    checkEquals(length(s1@case.ind.ref), 6)
+    checkTrue(s1@case.ind.ref$Bcells[5, 2]>30)
+    checkTrue(s1@case.ind.ref$Mono[12, 1]>800)
+    checkTrue(s1@case.ind.ref$Mono[13, 1]>120)
+    checkTrue(s1@case.ind.ref$Tcells_CD8[8, 5]>60)
+    checkTrue(s1@case.ind.ref$Tcells_CD8[10, 6]>9)
+
+    checkTrue(s1@ctrl.ind.ref$NKcells[5, 1]>370)
+}
+
+
+
+
 

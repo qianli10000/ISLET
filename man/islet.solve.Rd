@@ -7,15 +7,15 @@ Solving individual-specific and cell-type-specific reference panels
 This function, \code{isletSolve}, is a core function of ISLET. It takes the output from data preparation function \code{dataPrep}, and solve for individual-specific and cell-type-specific reference panels. It has parallel computing implemented to speed up the EM algorithm application.
 }
 \usage{
-isletSolve(input, ncores = min(detectCores()-1, 15) )
+isletSolve(input, BPPARAM=bpparam() )
 }
 
 \arguments{
   \item{input}{
 The list object output from data preparation function \code{dataPrep}.
 }
-  \item{ncores}{
-The number of computing cores requested for parallel computing to speed up the estimation. If not specified, the default will learn from the computing environment.
+  \item{BPPARAM}{
+An instance of \code{BiocParallelParam} class, e.g. MulticoreParam, SnowParam, SerialParam, to facilitate parallel computing. If using Unix, MulticoreParam is recommended. Customized options within \code{BiocParallelParam} class is allowed. If not specified, the default back-end is retrieve.
 }
 
 }

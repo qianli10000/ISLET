@@ -7,15 +7,15 @@ Testing for cell-type-specific Differential Expression (csDE) genes
 This function, \code{isletTest}, can take the output from data preparation function \code{dataPrep}, and test for csDE genes. It uses Likelihood Ratio Test (LRT), iterating all cell types. The output is a matrix of p-values from LRT. It has parallel computing implemented to speed up the EM algorithm application.
 }
 \usage{
-isletTest(input, ncores = min(detectCores()-1, 15) )
+isletTest(input, BPPARAM=bpparam() )
 }
 
 \arguments{
   \item{input}{
 The list object output from data preparation function \code{dataPrep}.
 }
- \item{ncores}{
-The number of computing cores requested for parallel computing to speed up the estimation. If not specified, the default will learn from the computing environment.
+ \item{BPPARAM}{
+An instance of \code{BiocParallelParam} class, e.g. MulticoreParam, SnowParam, SerialParam, to facilitate parallel computing. If using Unix, MulticoreParam is recommended. Customized options within \code{BiocParallelParam} class is allowed. If not specified, the default back-end is retrieve.
 }
 
 }

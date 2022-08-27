@@ -65,17 +65,26 @@ ISLET needs one input file organized into `r Biocpkg("SummarizedExperiment")` ob
 library(ISLET)
 data(GE600)
 ls()
+GE600_se
 ```
+
 
 It contains a `SummarizedExperiment` object containing the following elements:
 
-`counts` stores the gene expression value data frame of 50 genes by 600 sample, with 100 cases and 100 controls, 3 repeated measurements (or time points) per subject.
+`counts` stores the gene expression value data frame of 50 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
+```{r, eval = TRUE, message = FALSE}
+assays(GE600_se)$counts[1:5, 1:6]
+```
 
-`colData` stores the sample meta-data and the input cell type proportions. The first column is the group status (i.e. case/ctrl), the second column is the subject ID, shows the relationship between the 600 samples IDs and their 200 subject IDs. The remaining 6 columns (i.e. column 3-8) are the cell type proportions of all samples by their 6 cell types.
+`colData` stores the sample meta-data and the input cell type proportions. The first column is the group status (i.e. case/ctrl), the second column is the subject ID, shows the relationship between the 520 samples IDs and their 172 subject IDs. The remaining 6 columns (i.e. column 3-8) are the cell type proportions of all samples by their 6 cell types. The 6 cell types are: B cells, Tcells_CD4, Tcells_CD8, NK cells, Mono cells, and others cells.
+```{r, eval = TRUE, message = FALSE}
+colData(GE600_se)
+```
+
 
 # Data preparation
 
-This is the first step required before using ISLET for individual-specific reference deconvolution or testing. This step will prepare your input data for the downstream reference panels deconvolution (function `isletSolve`) and/or testing of differential expression gene (function `isletTest`).
+This is the first step required before using ISLET for individual-specific reference deconvolution or testing. This step will prepare your input data for the downstream reference panels deconvolution (function `isletSolve`) and/or testing of differential expression gene (function `isletTest`). During this step, the input data in `SummarizedExperiment` format will be further processed for ISLET. The expression values, from cases and controls respectively, will be extracted. The cell type names, number of cell types, number of cases/controls subject, number of cases/controls samples, will be obtained.  
 
 **Step 2**: Data preparation for downstream ISLET analysis.
 
@@ -83,18 +92,31 @@ This is the first step required before using ISLET for individual-specific refer
 study123input <- dataPrep(dat_se=GE600_se)
 ```
 
-[**Attention**] Here we have strict requirement for the input data. Each subject ID represents a unique participant across cases and controls.
+The output, are the extracted information in a S4 object, and can be overviewed by the function below:
+
+```{r, eval = TRUE, message = FALSE}
+study123input
+```
+
+[**Attention**] Here we have strict requirement for the input data. Each subject ID represents a unique participant across cases and controls. Subjects also need to be sorted. 
 
 # Deconvolve individual-specific reference panel
 
 **Step 3**: With the curated data `study123input` from the previous step, now we can use `ISLET` to conduct deconvolution and obtain the individual-specific and cell-type-specific reference panels. This process can be achieved by running:
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval = TRUE, message = FALSE}
 #Use ISLET for deconvolution
 res.sol <- isletSolve(input=study123input)
 ```
 
 The `res.sol` is the deconvolution result list. For both case and control group, the deconvolution result is a list of length `K`, where `K` is the number of cell types. For each of the `K` elements, it is a matrix of dimension `G` by `N`. For each of the `K` cell types, it stores the deconvoluted values in a feature (`G`) by subject (`N`) matrix,
+
+```{r, eval = TRUE, message = FALSE}
+#View the deconvolution results
+length(res.sol@case.ind.ref) #For cases, a list of 6 cell types' matrices. 
+length(res.sol@ctrl.ind.ref) #For controls, a list of 6 cell types' matrices.
+res.sol@case.ind.ref$Bcells[1:5, 1:4] #view the reference panels for B cells, for the first 5 genes and first 4 subjects.
+```
 
 `case.ind.ref` A list of length `K`, where `K` is the number of cell types. For each of the `K` elements in this list, it is a feature by subject matrix containing all the feature values (i.e. gene expression values), for case group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. `ctrl.ind.ref` A list of length `K`, where `K` is the number of cell types. For each of the `K` elements in this list, it is a feature by subject matrix containing all the feature values (i.e., gene expression values), for control group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. `mLLK` A scalar, the optimized marginal log-likelihood for the current model. It will be used in Likelihood Ratio Test (LRT).
 
@@ -102,12 +124,18 @@ The `res.sol` is the deconvolution result list. For both case and control group,
 
 Also, with the curated data `study123input` from the previous **Step 2**, now we can test the group effect on individual reference panels, i.e., identifying csDE genes in mean or intercept. In this 'intercept test', we assume that the individual-specific reference panel is unchanged across time points. Note that **Step 3** can be skipped, if one only need to call csDE genes. This test is done by the following line of code:
 
-```{r, eval = FALSE}
+```{r, eval = TRUE, message = FALSE}
 #Test for csDE genes
 res.test <- isletTest(input=study123input)
 ```
 
 The result `res.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type.
+
+```{r, eval = TRUE, message = FALSE}
+#View the test p-values
+head(res.test)
+```
+
 
 # Test csDE in change-rate (slope)
 
@@ -125,11 +153,18 @@ ls()
 
 Similar to previous sections, it contains one `SummarizedExperiment` objects containing the following elements:
 
-`counts` has the gene expression value data frame of 50 genes by 600 sample. 200 cancer/control subjects times 3 repeated measurement each subject.
+`counts` has the gene expression value data frame of 50 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
+```{r, eval = TRUE, message = FALSE}
+assays(GE600age_se)$counts[1:5, 1:6]
+```
 
-`colData` contains the sample meta-data. The first column is the case/ctrl group status, the second column is the subject ID, shows the relationship between the 600 samples IDs and the corresopnding subject IDs. The third column is the age variable for each sample, which is the main variable in downstream testing. The remaining 6 columns (i.e. column 4-9) are the cell type proportions of all samples by their 6 cell types.
+`colData` contains the sample meta-data. The first column is the case/ctrl group status, the second column is the subject ID, shows the relationship between the samples IDs and the corresopnding subject IDs. The third column is the age variable for each sample, which is the main variable in downstream testing. The remaining 6 columns (i.e. column 4-9) are the cell type proportions of all samples by their 6 cell types. The 6 cell types are: B cells, Tcells_CD4, Tcells_CD8, NK cells, Mono cells, and others cells.
+```{r, eval = TRUE, message = FALSE}
+colData(GE600age_se)
+```
 
-[**Attention**] This time/age covariate must be stored in the third column in `colData`, to successfully execute this testing.
+
+[**Attention**] This time/age covariate must be stored in the third column in `colData`, to successfully execute this testing. The data must be sorted by subject ID, so that the multiple replicates per subject are close to each other. 
 
 **Step 2**: Data preparation.
 
@@ -140,12 +175,17 @@ study456input <- dataPrepSlope(dat_se=GE600age_se)
 
 **Step 3**: 'Slope' testing.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 #(3) Test for slope effect(i.e. age) difference in csDE testing
 age.test <- isletTest(input=study456input)
 ```
 
-The result `age.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type, to test for difference of the change in reference over time.
+The result `age.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type. In contrast to the (intercept) test described before, here is a test for difference of the expression CHANGE IN REFERENCE over time, between cases and controls.
+
+```{r, eval = TRUE, message = FALSE}
+#View the test p-values
+head(age.test)
+```
 
 # Session info {.unnumbered}
 

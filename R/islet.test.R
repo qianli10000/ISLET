@@ -58,7 +58,8 @@ islet.lrt.block<-function(Y, datuse, ktest){
     B_0 <- Matrix::tcrossprod( Matrix::tcrossprod(solve( Matrix::crossprod(X)), X), t(Y))
 
     #1.2 error terms
-    sig <- mean((Y-X%*%B_0)^2)
+    # sig <- mean((Y-X%*%B_0)^2)
+    sig <- colMeans((Y-X%*%B_0)^2)
     #sig <- 20
 
     #1.3 missing values
@@ -67,8 +68,10 @@ islet.lrt.block<-function(Y, datuse, ktest){
     B_t <- B_0
     #sig_t = rep(sig, 7)
     U_t <- U_0
-    sig0_t <- rep(sig, G)
-    sigK_t <- rep(sig, K)
+    #sig0_t <- rep(sig, G)
+    #sigK_t <- rep(sig, K)
+    sig0_t <- sig #rep(sig, G)
+    sigK_t <- matrix(rep(sig, each=K), nrow=K)
 
     iem <- 1
     diff1 <- 100
@@ -78,7 +81,8 @@ islet.lrt.block<-function(Y, datuse, ktest){
 
     #Sig_U = diag(rep(sigK_t, each = NU))
     Sig_p<-lapply(seq_len(G), function(x, A, sig0_t, sigK_t, NU, Y, X, B_t){
-        invSig_U<-Matrix::bdiag(diag(rep(1/sigK_t, each=NU)))
+        #invSig_U<-Matrix::bdiag(diag(rep(1/sigK_t, each=NU)))
+        invSig_U<-Matrix::bdiag(diag(rep(1/sigK_t[,x], each=NU)))
         Sig<-solve( Matrix::crossprod(A)/sig0_t[x]+invSig_U)
         hftmp1 <- Matrix::tcrossprod(Sig, A)
         hftmp2 <- BiocGenerics::t(Y[, x] - Matrix::tcrossprod(X, BiocGenerics::t(B_t[, x])))
@@ -88,7 +92,7 @@ islet.lrt.block<-function(Y, datuse, ktest){
     E_Up<-do.call(cbind, lapply(Sig_p, function(x)x$U))
 
 
-    while(diff2>0.01 & iem<30){
+    while(iem<15){
 #        cat("iteration=", iem, "\n")
         iem <- iem + 1
         ####2. E-step
@@ -210,45 +214,45 @@ islet.lrt.block<-function(Y, datuse, ktest){
 ###Wrap function to run ISLET LRT, using parallel computing
 #ipc is the index of parallel computing for
 
-isletTest<-function(input, ncores = min(detectCores()-1, 15) ){
+isletTest<-function(input, BPPARAM=bpparam() ){
     G <- nrow(input@exp_case)
     type<-input@type
     Yall<-as.matrix(cbind(input@exp_case, input@exp_ctrl))
-    aval.nworkers<-ncores
+    aval.nworkers<-BPPARAM$workers
     block.size<-max(ceiling(G/aval.nworkers), 5)
     Yall.list <- split(as.data.frame(Yall), ceiling(seq_len(G)/block.size))
 
-  if(.Platform$OS.type == "unix") {
+#  if(.Platform$OS.type == "unix") {
     ## do some parallel computation under Unix
-      multicoreParam <- MulticoreParam(workers = ncores)
-    mf <- bplapply(X=Yall.list, islet.solve.block, datuse = input, BPPARAM = multicoreParam)
+#      multicoreParam <- MulticoreParam(workers = ncores)
+    mf <- bplapply(X=Yall.list, islet.solve.block, datuse=input, BPPARAM=BPPARAM)
     #use islet.lrt.unix
 
     test.fun<-function(iTest){
         cat("csDE testing on cell type",iTest, "\n")
-        if(type=='intercept'){
+        if(type == 'intercept'){
             inputnew <- changeinput(dc=input, iK=iTest)
         }else{inputnew <- changeinput_slope(dc=input, iK=iTest)}
 
         tmp1 <- bplapply(X=Yall.list, islet.lrt.block, datuse=inputnew,
-                         ktest=iTest, BPPARAM=multicoreParam)
+                         ktest=iTest, BPPARAM=BPPARAM)
         tmp2 <- unlist(tmp1)
         tmp3 <- unlist(lapply(mf, '[[' , 7))
         ###obtain the p-values from each cell type
-        tmp4 <- LRT(tmp3, tmp2, df = 1)
+        tmp4 <- LRT(tmp3, tmp2, df=1)
         return(tmp4)
     }
-    test.list<-lapply(seq_len(input@K),FUN=test.fun)
+    test.list<-lapply(seq_len(input@K), FUN=test.fun)
     test.res<-do.call(cbind,test.list)
     colnames(test.res) <- colnames(input@X[, seq_len(input@K)])
     cat("csDE testing on", input@K,"cell types finished", "\n")
-    }else {
+#    }else {
     ## This will be windows
     ## Use serial param or do not use any parallel functions, just use ‘lapply’
     ## result should be of the same “type” from both the if and else statements.
 
-    nworkers<-ncores
-    cl <- makeCluster(nworkers)
+#    nworkers<-ncores
+#    cl <- makeCluster(nworkers)
 
     ## Remove clusterExport(), clusterEvalQ() if use devtools::install() to build package
 #    clusterExport(cl,list('colss'))
@@ -256,29 +260,15 @@ isletTest<-function(input, ncores = min(detectCores()-1, 15) ){
 #        library(Matrix)
 #        library(BiocGenerics)})
 
-    mf <- parLapply(cl, X=Yall.list, islet.solve.block, datuse = input)
+#    mf <- parLapply(cl, X=Yall.list, islet.solve.block, datuse = input)
 
-    test.fun<-function(iTest){
-        cat("csDE testing on cell type",iTest, "\n")
-        if(type=='intercept'){
-            inputnew <- changeinput(input, iTest)
-        }else{
-            inputnew <- changeinput_slope(input, iTest)}
-        tmp1 <- parLapply(cl, X=Yall.list, islet.lrt.block, datuse = inputnew, ktest = iTest)
-        tmp2 <- unlist(tmp1)
-        tmp3 <- unlist(lapply(mf, '[[' , 7))
-        ###obtain the p-values from each cell type
-        tmp4 <- LRT(tmp3, tmp2, df = 1)
-        return(tmp4)
-    }
 
-    test.list<-lapply(seq_len(input@K),FUN=test.fun)
-    test.res<-do.call(cbind,test.list)
-    colnames(test.res) <- colnames(input@X[, seq_len(input@K)])
-    cat("csDE testing on", input@K,"cell types finished", "\n")
-    stopCluster(cl)
-  }
-
+#    test.list<-lapply(seq_len(input@K),FUN=test.fun)
+#    test.res<-do.call(cbind,test.list)
+ #   colnames(test.res) <- colnames(input@X[, seq_len(input@K)])
+ #   cat("csDE testing on", input@K,"cell types finished", "\n")
+#    stopCluster(cl)
+#  }
   return(test.res)
 }
 

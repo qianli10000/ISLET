@@ -1,33 +1,31 @@
 
 ###function to run ISLET, using parallel computing
 
-isletSolve<-function(input, ncores = min(detectCores()-1, 15) ){
+isletSolve<-function(input, BPPARAM=bpparam() ){
     # islet.solve only runs on the model without age effect.
-    if(input@type=='slope'){
-        stop('Input should be prepared by dataprep()')
+    if(input@type == 'slope'){
+        stop('Input should be prepared by dataPrep()')
     }
-    if(ncores>detectCores()){
-        stop('Number of cores specified above the limit')
-    }
+
 
     #make Yall a list
     G <- nrow(input@exp_case)
     Yall<-as.matrix(cbind(input@exp_case, input@exp_ctrl))
-    aval.nworkers<-ncores
+    aval.nworkers<-BPPARAM$workers
     block.size<-max(ceiling(G/aval.nworkers), 5)
     Yall.list <- split(as.data.frame(Yall), ceiling(seq_len(G)/block.size))
 
-    if(.Platform$OS.type == "unix") {
+#    if(.Platform$OS.type == "unix") {
     ## do some parallel computation under Unix
-        multicoreParam <- MulticoreParam(workers = ncores)
-      res <- bplapply( X=Yall.list, islet.solve.block, datuse = input, BPPARAM = multicoreParam)
-  }
-  else {
+#        multicoreParam <- MulticoreParam(workers = ncores)
+      res <- bplapply(X=Yall.list, islet.solve.block, datuse=input, BPPARAM=BPPARAM)
+#  }
+#  else {
     ## This will be windows
     ## Use serial param or do not use any parallel functions, just use ‘lapply’
     ## result should be of the same “type” from both the if and else statements.
-    nworkers<-length(Yall.list)
-    cl <- makeCluster(nworkers)
+#    nworkers<-length(Yall.list)
+#    cl <- makeCluster(nworkers)
 
     ## Remove clusterExport(), clusterEvalQ() if use devtools::install() to build package
 #    clusterExport(cl,list('colss'))
@@ -35,10 +33,10 @@ isletSolve<-function(input, ncores = min(detectCores()-1, 15) ){
 #        library(Matrix)
 #        library(BiocGenerics)})
 
-    res <-parLapply(cl, X=Yall.list, islet.solve.block, datuse = input)
-    stopCluster(cl)
-
-  }
+#    res <-parLapply(cl, X=Yall.list, islet.solve.block, datuse=input)
+#    stopCluster(cl)
+#
+#  }
 
   # Organize estimated individual reference
   K<-input@K
