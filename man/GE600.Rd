@@ -7,14 +7,14 @@
 ISLET deconvolution example raw input data
 }
 \description{
-\code{GE600} contains the raw example datasets for ISLET. It has the gene expression values for 50 genes among 200 subjects, with 3 temporal measures per subject. Among these 200 subjects, 100 are cases (i.e. cancer) and 100 are controls (i.e. healthy). Data were combined by case/control status, into one single \code{SummarizedExperiment} object. These raw example datasets will need to be converted by the \code{dataPrep} function, and then they will be ready for downstream deconvolution (function \code{isletSolve}) and/or differentially expressed gene testing (function \code{isletTest}).
+\code{GE600} contains the raw example datasets for ISLET. It has the gene expression values for 10 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Data were combined by case/control status, into one single \code{SummarizedExperiment} object. These raw example datasets will need to be converted by the \code{dataPrep} function, and then they will be ready for downstream deconvolution (function \code{isletSolve}) and/or differentially expressed gene testing (function \code{isletTest}).
 }
 \usage{data(GE600)}
 \format{
   One \code{SummarizedExperiment} object containing the following elements:
   \describe{
-    \item{\code{counts}}{A gene expression value data frame of 50 genes by 600 sample. 200 cancer and control subjects, times 3 repeated measurement each subject.}
-    \item{\code{colData}}{Sample meta-data. The first column is the group status (i.e. case/ctrl), the second column is the subject ID, shows the relationship between the 600 samples IDs and their 200 subject IDs. The remaining 6 columns (i.e. column 3-8) are the cell type proportions of all samples by their 6 cell types.}
+    \item{\code{counts}}{A gene expression value data frame of 10 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject.}
+    \item{\code{colData}}{Sample meta-data. The first column is the group status (i.e. case/ctrl), the second column is the subject ID, shows the relationship between the samples IDs and their subject IDs. The remaining 6 columns (i.e. column 3-8) are the cell type proportions of all samples by their 6 cell types.}
   }
 }
 
@@ -26,12 +26,6 @@ ls()
 #show GE600_se details
 GE600_se
 #An object of class "SummarizedExperiment"
-
-dim(assays(GE600_se)$counts)
-##[1]  50 600
-
-dim(colData(GE600_se))
-##[1] 600   8
 
 #Then, we can proceed to data preparation step, function 'dataPrep' for ISLET.
 ##The rest of the deconvolution/csDE analysis will then follow.

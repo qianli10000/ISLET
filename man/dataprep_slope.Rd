@@ -19,7 +19,7 @@ This is the initial step for using ISLET, to prepare your data input ready for d
 }
 
 \value{
-\code{dataPrepSlope} returns a list of elements ready to serve as the input for cell-type-specific differentially expressed gene testing (function \code{isletTest}).
+\code{dataPrepSlope} returns a S4 object, containing elements ready to serve as the input for cell-type-specific differentially expressed gene testing (function \code{isletTest}).
 }
 
 \author{
@@ -35,7 +35,7 @@ ls()
 #(1) Data preparation
 study456input <- dataPrepSlope(dat_se=GE600age_se)
 
-#(2) Test for slope effect(i.e. age) difference in csDE testing
-result.test <- isletTest(input=study456input)
+#(2) [Downstream] Test for slope effect(i.e. age) difference in csDE testing
+#result.test <- isletTest(input=study456input)
 
 }

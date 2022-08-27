@@ -71,7 +71,7 @@ GE600_se
 
 It contains a `SummarizedExperiment` object containing the following elements:
 
-`counts` stores the gene expression value data frame of 50 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
+`counts` stores the gene expression value data frame of 10 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
 ```{r, eval = TRUE, message = FALSE}
 assays(GE600_se)$counts[1:5, 1:6]
 ```
@@ -153,7 +153,7 @@ ls()
 
 Similar to previous sections, it contains one `SummarizedExperiment` objects containing the following elements:
 
-`counts` has the gene expression value data frame of 50 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
+`counts` has the gene expression value data frame of 10 genes by 520 sample, with 83 cases and 89 controls, and multiple repeated measurements (i.e. time points) per subject. Each row is a gene and each column is a sample. 
 ```{r, eval = TRUE, message = FALSE}
 assays(GE600age_se)$counts[1:5, 1:6]
 ```
@@ -175,14 +175,14 @@ study456input <- dataPrepSlope(dat_se=GE600age_se)
 
 **Step 3**: 'Slope' testing.
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 #(3) Test for slope effect(i.e. age) difference in csDE testing
 age.test <- isletTest(input=study456input)
 ```
 
 The result `age.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type. In contrast to the (intercept) test described before, here is a test for difference of the expression CHANGE IN REFERENCE over time, between cases and controls.
 
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 #View the test p-values
 head(age.test)
 ```

@@ -41,7 +41,7 @@ ls()
 study123input <- dataPrep(dat_se=GE600_se)
 
 #(2) [optional for csDE genes testing] Individual-specific and cell-type-specific deconvolution
-result.solve <- isletSolve(input=study123input)
+#result.solve <- isletSolve(input=study123input)
 
 #(3) Test for csDE genes
 result.test <- isletTest(input=study123input)

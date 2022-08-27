@@ -19,7 +19,7 @@ This is the initial step for using ISLET, to prepare your data input ready for d
 }
 
 \value{
-\code{dataPrep} returns a list of elements ready to serve as the input for downstream deconvolution (function \code{isletSolve}) and/or differentially expressed gene testing (function \code{isletTest}).
+\code{dataPrep} returns a S4 object, containing elements ready to serve as the input for downstream deconvolution (function \code{isletSolve}) and/or differentially expressed gene testing (function \code{isletTest}).
 }
 
 \author{

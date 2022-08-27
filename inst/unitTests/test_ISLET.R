@@ -47,19 +47,16 @@ test_ISLETtest <- function() {
     #(3) Test for csDE genes
     r1 <- isletTest(input=study123input)
 
-    checkEquals(nrow(r1), 50)
+    checkEquals(nrow(r1), 10)
     checkEquals(ncol(r1), 6)
-    checkEquals(sum(r1<=1), 50*6)
-    checkEquals(sum(r1>=0), 50*6)
+    checkEquals(sum(r1<=1), 10*6)
+    checkEquals(sum(r1>=0), 10*6)
 
-    checkTrue(r1[11, 1]<0.015)
-    checkTrue(r1[47, 1]<0.01)
-    checkTrue(r1[49, 1]<0.005)
-    checkTrue(r1[50, 1]<0.005)
+    checkTrue(r1[7, 6]<0.003)
+    checkTrue(r1[9, 1]<0.015)
+    checkTrue(r1[8, 2]<0.035)
 
-    checkEqualsNumeric(r1[45, 3], 1, tolerance=1.0e-2)
-    checkEqualsNumeric(r1[45, 3], 1, tolerance=1.0e-2)
-    checkEqualsNumeric(r1[22, 4], 1, tolerance=1.0e-2)
+    checkEqualsNumeric(r1[4, 6], 1, tolerance=1.0e-2)
 
     #   checkEqualsNumeric(divideBy(4, 1.2345), 3.24, tolerance=1.0e-4)
 }
@@ -74,19 +71,17 @@ test_ISLETtestAge <- function() {
     #(2) Test for slope effect(i.e. age) difference in csDE testing
     r2 <- isletTest(input=study456input)
 
-    checkEquals(nrow(r2), 50)
+    checkEquals(nrow(r2), 10)
     checkEquals(ncol(r2), 6)
-    checkEquals(sum(r2<=1), 50*6)
-    checkEquals(sum(r2>=0), 50*6)
+    checkEquals(sum(r2<=1), 10*6)
+    checkEquals(sum(r2>=0), 10*6)
 
     checkEqualsNumeric(r2[1, 1], 1, tolerance=1.0e-2)
     checkEqualsNumeric(r2[9, 1], 1, tolerance=1.0e-2)
-    checkEqualsNumeric(r2[45, 3], 1, tolerance=1.0e-2)
 
-    checkTrue(r2[42, 1]<0.01)
-    checkTrue(r2[16, 3]<0.007)
-    checkTrue(r2[49, 5]<0.007)
-    checkTrue(r2[40, 6]<0.01)
+    checkTrue(r2[7, 1]<0.02)
+    checkTrue(r2[7, 6]<0.007)
+    checkTrue(r2[1, 5]<0.03)
 }
 
 
@@ -99,8 +94,6 @@ test_ISLETsolve <- function() {
 
     checkEquals(length(s1@case.ind.ref), 6)
     checkTrue(s1@case.ind.ref$Bcells[5, 2]>30)
-    checkTrue(s1@case.ind.ref$Mono[12, 1]>800)
-    checkTrue(s1@case.ind.ref$Mono[13, 1]>120)
     checkTrue(s1@case.ind.ref$Tcells_CD8[8, 5]>60)
     checkTrue(s1@case.ind.ref$Tcells_CD8[10, 6]>9)
 
