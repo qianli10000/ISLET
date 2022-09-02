@@ -1,7 +1,7 @@
 Package: ISLET
 Type: Package
 Title: Individual-Specific ceLl typE referencing Tool 
-Version: 0.99.7
+Version: 0.99.8
 Date: 2022-07-14
 Authors@R: c(person("Hao", "Feng", role = c("aut", "cre"),
                      email = "hxf155@case.edu"),
@@ -12,7 +12,7 @@ License: GPL-2
 Depends: R(>= 4.1.0), Matrix, parallel, BiocParallel, SummarizedExperiment, BiocGenerics
 Imports: stats, methods
 Suggests: BiocStyle, knitr, rmarkdown, htmltools, RUnit
-Collate: utils.R dataprep.R dataprep_slope.R islet.est.R islet.solve.R islet.test.R
+Collate: utils.R dataprep.R dataprep_slope.R islet.est.R islet.solve.R islet.test.R AllClasses.R show-methods.R
 biocViews: Software, RNASeq, Transcriptomics, Transcription, Sequencing, GeneExpression, DifferentialExpression, DifferentialMethylation
 Encoding: UTF-8
 LazyData: false

@@ -113,9 +113,12 @@ The `res.sol` is the deconvolution result list. For both case and control group,
 
 ```{r, eval = TRUE, message = FALSE}
 #View the deconvolution results
-length(res.sol@case.ind.ref) #For cases, a list of 6 cell types' matrices. 
-length(res.sol@ctrl.ind.ref) #For controls, a list of 6 cell types' matrices.
-res.sol@case.ind.ref$Bcells[1:5, 1:4] #view the reference panels for B cells, for the first 5 genes and first 4 subjects.
+caseVal <- caseEst(res.sol)
+ctrlVal <- ctrlEst(res.sol)
+length(caseVal) #For cases, a list of 6 cell types' matrices. 
+length(ctrlVal) #For controls, a list of 6 cell types' matrices.
+caseVal$Bcells[1:5, 1:4] #view the reference panels for B cells, for the first 5 genes and first 4 subjects, in Case group.
+ctrlVal$Bcells[1:5, 1:4] #view the reference panels for B cells, for the first 5 genes and first 4 subjects, in Control group.
 ```
 
 `case.ind.ref` A list of length `K`, where `K` is the number of cell types. For each of the `K` elements in this list, it is a feature by subject matrix containing all the feature values (i.e. gene expression values), for case group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. `ctrl.ind.ref` A list of length `K`, where `K` is the number of cell types. For each of the `K` elements in this list, it is a feature by subject matrix containing all the feature values (i.e., gene expression values), for control group. It is one of the main products the individual-specific and cell-type-specific solve algorithm. `mLLK` A scalar, the optimized marginal log-likelihood for the current model. It will be used in Likelihood Ratio Test (LRT).
@@ -175,14 +178,14 @@ study456input <- dataPrepSlope(dat_se=GE600age_se)
 
 **Step 3**: 'Slope' testing.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 #(3) Test for slope effect(i.e. age) difference in csDE testing
 age.test <- isletTest(input=study456input)
 ```
 
 The result `age.test` is a matrix of p-values, in the dimension of feature by cell type. Each element is the LRT p-value, by contrasting case group and control group, for one feature in one cell type. In contrast to the (intercept) test described before, here is a test for difference of the expression CHANGE IN REFERENCE over time, between cases and controls.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval = TRUE, message = FALSE}
 #View the test p-values
 head(age.test)
 ```
